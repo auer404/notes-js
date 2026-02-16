@@ -1,0 +1,9 @@
+• Point de départ : une fenêtre vide
+
+• L'utilisateur devra pouvoir ajouter des "notes" (penser à des post-its) dans la fenêtre.
+
+• Ces "notes" devront pouvoir être éditées (texte), repositionnées librement sur la fenêtre, et supprimées (après demande de confirmation).
+
+-> Imaginer : une note = un petite fenêtre NotePad / TextEdit, notre fenêtre de navigateur = l'écran de l'ordinateur.
+
+• Il faudra que les contenus des notes soient sauvegardés, sans perturber l'expérience utilisateur (pas de rechargement de page / redirections)

@@ -1,0 +1,69 @@
+body {
+    margin:0;
+}
+
+#workspace {
+    height:100vh;
+    width:100%;
+    position:absolute;
+}
+
+.note {
+    width:250px;
+    height:250px;
+    background-color:orange;
+    display:flex;
+    flex-direction:column;
+    border-radius:5px;
+    overflow:hidden;
+    position:absolute;
+    border:1px solid white;
+    /* left:100px;
+    top:100px; */
+}
+
+.handlebar {
+    height:20px;
+    background-color:rgba(0, 0, 0, 0.25);
+    display:flex;
+    justify-content: flex-end;
+    padding:2px;
+    box-sizing:border-box;
+    cursor:move;
+}
+
+.handlebar button { /* ! \ Comportement visuel spécifique constaté dans Safari... à contrôler ! */
+    padding:0;
+    aspect-ratio:1/1;
+    background-color:rgba(255, 255, 255, 0.25);
+    border:none;
+    border-radius:3px;
+    cursor:pointer;
+    color:white;
+}
+
+.handlebar button:hover {
+    background-color:rgba(255, 255, 255, 0.5);
+}
+
+.note textarea {
+    width:100%;
+    height:100%;
+
+    /* height:calc(100% - 15px); */
+
+    box-sizing:border-box; /* Faire en sorte que le padding soit compris dans la largeur / hauteur au lieu de s'y ajouter */
+    border:none;
+    padding:5px;
+    background-color:transparent;
+    outline:none; /* bordure de "sélection" */
+    resize:none;
+}
+
+.note textarea:focus {
+    background-color:rgba(255, 255, 255, 0.25);
+}
+
+.note textarea::placeholder {
+    color:white;
+}

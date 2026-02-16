@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Notes JS</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="workspace"><!-- Toutes les notes seront générées dans ce conteneur --></div>
+
+    <!-- La balise template : permet de "sauvegarder" un modèle pour nos notes, sans l'afficher directement. Le script JS se basera sur ce modèle pour générer toutes les notes.  -->
+    <template id="base-note-structure">
+        <div class="note">
+            <div class="handlebar">
+               <button>×</button>
+            </div>
+            <textarea placeholder="Nouvelle note..."></textarea>
+        </div>
+    </template>
+    
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="https://code.jquery.com/ui/1.14.2/jquery-ui.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
