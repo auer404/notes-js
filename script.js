@@ -1,9 +1,18 @@
-const notes_list = JSON.parse(localStorage.getItem("notes-js"));
-// ! \ ATTENTION : dans le cas d'une première utilisation de l'appli, notes_list sera null, ce qui aura des conséquences sur la suite de ce qu'on veut faire à partir de notes_list
+const workspace = document.querySelector("#workspace");
+const template = document.querySelector("#base-note-structure");
+
+const notes_list = JSON.parse(localStorage.getItem("notes-js")) || [];
+// "|| []" -> notes_list correspondra SI POSSIBLE à ce qu'on trouve dans localStorage. Dans le cas inverse (localStorage null), on basculera sur un tableau vide.
+// Ici on fait en sorte que, si notre sauvegarde (le bon emplacement de localStorage) est vide, on utilisera tout de même un tableau. Sans cela, notes_list peut être null, ce qui poserait problème dans la suite du script (dès que l'on tente de passer en revue notes_list)
 
 console.log("Données sauvegardées : ", notes_list);
 
 // TODO : D'après les données récupérées via localStorage, on doit maintenant recréer toutes les notes correspondant, en HTML (via notre fonction add_note() ?)
+
+for (let n of notes_list) {
+    add_note();
+}
+
 
 function getNoteById(id) {
     // cette fonction doit nous fournir l'élément de notes_list portant l'id passé en paramètre,
@@ -25,19 +34,19 @@ function getNoteById(id) {
 // - au double-clic
 // - à l'endroit cliqué
 
-const workspace = document.querySelector("#workspace");
-const template = document.querySelector("#base-note-structure");
-
 //workspace.ondblclick = add_note;
 // OU (version plus propre et "cumulable") :
 workspace.addEventListener("dblclick", add_note);
 
-function add_note(e) {
+function add_note(e) { // ! \ selon le cas, e ne sera pas forcément défini
 
     //console.log(e); // e = l'événement lui-même, on peut voir dans la console toutes les infos qu'il pourra nous donner, et on en déduit :
 
-    const mouseX = e.clientX;
-    const mouseY = e.clientY;
+    if (e) { // Scénario "double-clic" -> NOUVELLE note
+        const mouseX = e.clientX;
+        const mouseY = e.clientY;
+    }
+
     // Soit les coordonnées de la souris au moment du double-clic
 
     // Préparation : "import" du contenu de notre template vers notre page globale
@@ -60,7 +69,7 @@ function add_note(e) {
         containment: "parent",
         stop: function(e, ui) {
             //console.log(ui)
-            new_note.save(); // Mettre à jour : position x/y
+            new_note.save(); // TODO : Mettre à jour : position x/y
         }
     });
 
@@ -81,7 +90,7 @@ function add_note(e) {
         console.log("Note sauvegardée");
 
         // On construit une version "sauvegardable" de notre note :
-        const new_note_data = {
+        const new_note_data = { // TODO : Coordonnées x/y
             note_id: new_note.note_id,
             content: new_note.field.value
         }
@@ -104,6 +113,7 @@ function add_note(e) {
     }
 
     new_note.delete_saved = function() {
+        // TODO
         console.log("Note supprimée (dans la sauvegarde)");
     }
 
@@ -111,3 +121,10 @@ function add_note(e) {
 
 }
 
+/* //* TODO
+- Récupération sauvegarde : cas où aucune donnée n'est en place
+- Récup sauvegarde -> création notes HTML
+- Suppression notes dans la sauvegarde
+- Auto-redimensionnement champ texte
+- Superposition notes
+*/
