@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rendre un champ auto-redimensionnable</title>
+    <style>
+
+        #version-css {
+            field-sizing: content;
+        }
+
+    </style>
+</head>
+<body>
+
+<textarea placeholder="comportement normal"></textarea>
+    
+<textarea id="version-css" placeholder="css : field-sizing"></textarea>
+<!-- Inconvénients :
+- Pas supporté par Firefox pour l'instant
+- Ne marche plus dès qu'on a manuellement redimensionné le champ
+- Redimensionne également dans la largeur 
+-->
+
+<textarea id="version-js" placeholder="solution maison JS"></textarea>
+
+<script>
+
+    const field = document.querySelector("#version-js");
+
+    // On doit réagir à tout changement dans le contenu du champ
+    field.addEventListener("input", function(){
+        field.style.height = ""; // RaZ -> permet d'établir un nouveau scrollHeight cohérent
+        field.style.height = field.scrollHeight + "px";
+        // On fait correspondre la hauteur du champ à la hauteur de son contenu scrollable.
+    });
+
+</script>
+
+</body>
+</html>

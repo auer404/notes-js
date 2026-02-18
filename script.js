@@ -7,10 +7,9 @@ const notes_list = JSON.parse(localStorage.getItem("notes-js")) || [];
 
 console.log("Données sauvegardées : ", notes_list);
 
-// TODO : D'après les données récupérées via localStorage, on doit maintenant recréer toutes les notes correspondant, en HTML (via notre fonction add_note() ?)
-
+// Création des notes correspondant aux données (peut-être) sauvegardées précédemment
 for (let n of notes_list) {
-    add_note();
+    add_note(n);
 }
 
 
@@ -18,7 +17,7 @@ function getNoteById(id) {
     // cette fonction doit nous fournir l'élément de notes_list portant l'id passé en paramètre,
     // ou nous indiquer qu'il n'existe pas.
 
-    for (let n of notes_list) { // ! \ ERREUR si notes_list == null
+    for (let n of notes_list) {
         if (n.note_id == id) {
             // On a trouvé
             return n;
@@ -38,14 +37,9 @@ function getNoteById(id) {
 // OU (version plus propre et "cumulable") :
 workspace.addEventListener("dblclick", add_note);
 
-function add_note(e) { // ! \ selon le cas, e ne sera pas forcément défini
+function add_note(e) { // ! \ selon le cas, e pourra correspondre à deux objets de nature différente
 
     //console.log(e); // e = l'événement lui-même, on peut voir dans la console toutes les infos qu'il pourra nous donner, et on en déduit :
-
-    if (e) { // Scénario "double-clic" -> NOUVELLE note
-        const mouseX = e.clientX;
-        const mouseY = e.clientY;
-    }
 
     // Soit les coordonnées de la souris au moment du double-clic
 
@@ -58,19 +52,50 @@ function add_note(e) { // ! \ selon le cas, e ne sera pas forcément défini
     // Insertion à l'emplacement voulu :
     workspace.append(new_note);
 
-    new_note.note_id = crypto.randomUUID(); // identifiant unique
+    new_note.field = new_note.querySelector("textarea");
+
+    if (e.clientX && e.clientY) { // Scénario "double-clic" -> NOUVELLE note
+        
+        new_note.x = e.clientX;
+        new_note.y = e.clientY;
+        new_note.note_id = crypto.randomUUID(); // identifiant unique
+
+    } else { // Scénario "chargement de la sauvegarde"
+
+        new_note.x = e.x;
+        new_note.y = e.y;
+        new_note.note_id = e.note_id;
+        new_note.field.value = e.content;
+    }
 
     // Positionnement inital (en fonction des coordonnées de la souris) :
-    new_note.style.top = mouseY - 10 + "px";
-    new_note.style.left = mouseX - new_note.offsetWidth / 2 + "px";
+    new_note.style.top = new_note.y - 10 + "px";
+    new_note.style.left = new_note.x - new_note.offsetWidth / 2 + "px";
 
     // Pour rendre la nouvelle note "glissable-déposable"
     $(new_note).draggable({
         containment: "parent",
+        // zIndex:1,
+        stack:".note",
         stop: function(e, ui) {
-            //console.log(ui)
-            new_note.save(); // TODO : Mettre à jour : position x/y
+            //console.log(ui);
+            new_note.x = ui.position.left + new_note.offsetWidth / 2;
+            new_note.y = ui.position.top + 10;
+            new_note.save();
+            new_note.field.focus(); // On donne la sélection au champ texte
         }
+    });
+
+    // Système anti suppression accidentelle de note vide (événement blur)
+
+    new_note.addEventListener("mousedown" , function(){
+        new_note.beforeDragStart = true;
+        // Sera testé avant suppression auto -> annulation
+    });
+
+    new_note.addEventListener("mouseup" , function(){
+        new_note.beforeDragStart = false;
+        // Permet de rendre à nouveau possible la suppression auto
     });
 
     // Activer le bouton de fermeture / suppression
@@ -82,17 +107,20 @@ function add_note(e) { // ! \ selon le cas, e ne sera pas forcément défini
         }
     });
 
-    new_note.field = new_note.querySelector("textarea");
-
     // Gestion de la sauvegarde
 
     new_note.save = function() {
-        console.log("Note sauvegardée");
 
+        if (new_note.field.value == "") {
+            return; // Si le champ est vide, on abandonne la sauvegarde
+        }
+     
         // On construit une version "sauvegardable" de notre note :
-        const new_note_data = { // TODO : Coordonnées x/y
+        const new_note_data = {
             note_id: new_note.note_id,
-            content: new_note.field.value
+            content: new_note.field.value,
+            x: new_note.x,
+            y: new_note.y
         }
 
         // On vérifie si la note est nouvelle (à ajouter) ou existe déjà dans la sauvegarde
@@ -102,29 +130,60 @@ function add_note(e) { // ! \ selon le cas, e ne sera pas forcément défini
         if (!existing_note) {
             notes_list.push(new_note_data); // Ajout
         } else {
-            existing_note.content = new_note_data.content; // Remplacement
-            // ! \ Pourquoi pas directement existing_note = new_note_data ??? À expliquer
+            // existing_note = new_note_data; // Ne fonctionnera pas : on ne remplacera qu'une référence à notre objet sauvegardé, rien ne changera dans notes_list. Pour contourner ce problème, on peut atteindre directement les propriétés de notre objet :
+            existing_note.content = new_note_data.content;
+            existing_note.x = new_note_data.x;
+            existing_note.y = new_note_data.y;
         }
 
         localStorage.setItem("notes-js", JSON.stringify(notes_list));
 
-        console.log(localStorage.getItem("notes-js"));
-
     }
 
     new_note.delete_saved = function() {
-        // TODO
-        console.log("Note supprimée (dans la sauvegarde)");
+
+        const note_to_delete = getNoteById(new_note.note_id);
+
+        // 1) On cherche l'indice de notre note dans la liste
+        const note_index = notes_list.indexOf(note_to_delete);
+   
+        // 2) Ce qui permet de supprimer cette note dans la liste
+        if (note_index != -1) { // On s'assure que note_to_delete se trouve bien dans la liste (indexOf() renvoie -1 dans le cas contraire)
+            notes_list.splice(note_index , 1);
+            localStorage.setItem("notes-js", JSON.stringify(notes_list));
+        }
     }
 
     new_note.field.addEventListener("input", new_note.save);
 
+    new_note.field.addEventListener("blur", function(){
+        
+        setTimeout(function(){
+
+            // beforeDragStart (booleen) : true entre le moment où on s'apprête à déplacer la note (mousedown) et le moment où on la dépose à son nouvel emplacement (mouseup) -> Permet d'éviter de supprimer accidentellement une note vide en voulant seulement la déplacer.
+            if (new_note.field.value == "" && !new_note.beforeDragStart) {
+                new_note.delete_saved();
+                new_note.remove();
+            }
+
+        },100);
+
+    });
+
+    // Intercepter les double-clics sur les notes
+    // (Pour éviter qu'ils occasionnent la création d'une nouvelle note)
+    new_note.addEventListener("dblclick", function(e){
+        e.stopPropagation();
+        // Le fait qu'on déclenche quelque chose au double-clic sur le conteneur de nos notes, provoque le même déclenchement lorsqu'on clique sur un élément enfant de ce conteneur (donc une note). Cela s'appelle la propagation d'événements, et on peut l'empêcher via stopPropagation().
+        // -> Un double-clic détecté sur une note ne sera pas propagé "derrière" elle (et ne déclenchera pas l'événement double-clic du conteneur)
+    });
+
+    new_note.field.focus(); // On donne la sélection au champ texte
+
 }
 
 /* //* TODO
-- Récupération sauvegarde : cas où aucune donnée n'est en place
-- Récup sauvegarde -> création notes HTML
-- Suppression notes dans la sauvegarde
 - Auto-redimensionnement champ texte
-- Superposition notes
+- Suppression notes vides lorsqu'on quitte / recharge la page ?
+
 */
