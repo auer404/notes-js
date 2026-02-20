@@ -1,23 +1,11 @@
 const workspace = document.querySelector("#workspace");
 const template = document.querySelector("#base-note-structure");
 
-// async function debug_getNotes() {
-//     console.log(await DB_getNotes());
-// }
-// debug_getNotes();
-
-// OU :
-
-DB_getNotes().then(function(res){
-    // Ici on a accès aux données en provenance de la BDD
-    console.log(res);
-}); 
-
 const notes_list = JSON.parse(localStorage.getItem("notes-js")) || [];
 // "|| []" -> notes_list correspondra SI POSSIBLE à ce qu'on trouve dans localStorage. Dans le cas inverse (localStorage null), on basculera sur un tableau vide.
 // Ici on fait en sorte que, si notre sauvegarde (le bon emplacement de localStorage) est vide, on utilisera tout de même un tableau. Sans cela, notes_list peut être null, ce qui poserait problème dans la suite du script (dès que l'on tente de passer en revue notes_list)
 
-//console.log("Données sauvegardées : ", notes_list);
+console.log("Données sauvegardées : ", notes_list);
 
 // Création des notes correspondant aux données (peut-être) sauvegardées précédemment
 for (let n of notes_list) {
@@ -207,7 +195,7 @@ function add_note(e) { // ! \ selon le cas, e pourra correspondre à deux objets
 window.addEventListener("beforeunload", function(e){
     // ! \ NE MARCHE PAS POUR L'INSTANT
     // Si l'une de nos notes est sélectionnée (son champ texte a le focus) : lui faire perdre le focus
-    //console.log(document.activeElement);
+    console.log(document.activeElement);
     document.activeElement.blur();
     //e.preventDefault();
     
